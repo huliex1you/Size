@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>حاسبة تكلفة المكونات</title>
+<style>
+  :root { color-scheme: light; --ink:#252525; --muted:#6b7280; --line:#e5e7eb; --accent:#7c3aed; --bg:#f7f7fb; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Tahoma,Arial,sans-serif; background:var(--bg); color:var(--ink); }
+  main { max-width:900px; margin:auto; padding:22px 14px 42px; }
+  header { background:#211b2d; color:white; border-radius:20px; padding:24px; margin-bottom:18px; }
+  h1 { margin:0 0 8px; font-size:clamp(24px,4vw,32px); }
+  header p { margin:0; line-height:1.8; color:#e9e4f2; }
+  .panel { background:white; border:1px solid var(--line); border-radius:18px; padding:18px; margin:14px 0; box-shadow:0 4px 16px #17171708; }
+  h2 { font-size:19px; margin:0 0 14px; }
+  .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  label { display:block; font-size:14px; font-weight:700; margin-bottom:6px; }
+  input, select { width:100%; padding:12px; border:1px solid #d1d5db; border-radius:11px; font:inherit; background:white; min-width:0; }
+  input:focus,select:focus { outline:2px solid #ddd6fe; border-color:var(--accent); }
+  .ingredient { border:1px solid var(--line); border-radius:14px; padding:14px; margin:12px 0; }
+  .ingredient-top { display:flex; gap:10px; align-items:center; margin-bottom:12px; }
+  .ingredient-top input { font-weight:700; }
+  .fields { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+  .costline { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px; padding-top:10px; border-top:1px dashed var(--line); }
+  .cost { color:#5b21b6; font-weight:800; font-size:18px; white-space:nowrap; }
+  button { border:0; border-radius:12px; padding:12px 16px; font:inherit; font-weight:700; cursor:pointer; }
+  .primary { background:var(--accent); color:white; }
+  .secondary { background:#f3f0ff; color:#5b21b6; }
+  .danger { background:#fff1f2; color:#be123c; padding:8px 11px; }
+  .actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+  .summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+  .metric { background:#f8f7ff; border:1px solid #e9e4ff; border-radius:14px; padding:15px; }
+  .metric span { display:block; color:var(--muted); font-size:13px; margin-bottom:8px; }
+  .metric strong { font-size:clamp(20px,4vw,27px); }
+  .note { color:var(--muted); font-size:13px; line-height:1.8; }
+  .empty { color:var(--muted); padding:10px 0; }
+  @media(max-width:650px) { .grid,.fields,.summary { grid-template-columns:1fr; } main { padding:12px 10px 30px; } header { padding:19px; } .panel { padding:14px; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>حاسبة تكلفة المكونات</h1>
+    <p>اكتب سعر العبوة كاملة ووزنها، ثم أدخل الكمية المستخدمة في الوصفة. ستحسب الصفحة تكلفة الكمية المستخدمة تلقائيًا بالريال.</p>
+  </header>
+
+  <section class="panel">
+    <h2>بيانات الوصفة (اختياري)</h2>
+    <div class="grid">
+      <div><label for="recipeName">اسم الوصفة</label><input id="recipeName" value="كوكيز" placeholder="مثال: كوكيز"></div>
+      <div><label for="yield">عدد الحبات الناتجة</label><input id="yield" type="number" min="0" step="1" value="18"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>المكونات</h2>
+    <div id="ingredients"></div>
+    <div class="actions">
+      <button class="primary" id="add">＋ إضافة مكون</button>
+      <button class="secondary" id="reset">إعادة ضبط المثال</button>
+    </div>
+    <p class="note">أدخل وزن العبوة والكمية المستخدمة بنفس الوحدة (غرام أو مل أو عدد). مثال: عبوة زبدة 100 غرام بسعر 7 ريالات، والمستخدم 150 غرامًا؛ تكلفة المستخدم = 10.50 ريال.</p>
+  </section>
+
+  <section class="panel">
+    <h2>النتيجة</h2>
+    <div class="summary">
+      <div class="metric"><span>إجمالي تكلفة المكونات المدخلة</span><strong id="total">0.00 ر.س</strong></div>
+      <div class="metric"><span>تكلفة الحبة (حسب عدد الإنتاج)</span><strong id="perItem">—</strong></div>
+      <div class="metric"><span>عدد المكونات المكتملة</span><strong id="complete">0</strong></div>
+    </div>
+    <div id="breakdown" style="margin-top:16px"></div>
+    <p class="note">النتيجة تشمل المكونات التي أدخلت بياناتها كاملة فقط. لا تشمل التغليف أو الكهرباء أو العمالة إلا إذا أضفتها كمكونات/تكاليف.</p>
+  </section>
+</main>
+<script>
+const defaults = [
+  {name:"الزبدة", price:7, pack:100, used:150, unit:"غرام"},
+  {name:"السكر الأبيض", price:"", pack:1000, used:100, unit:"غرام"},
+  {name:"حبيبات هيرشي", price:24, pack:285, used:100, unit:"غرام"},
+  {name:"حبيبات هيركو", price:380, pack:5000, used:100, unit:"غرام"},
+  {name:"الطحين", price:"", pack:1000, used:320, unit:"غرام"},
+  {name:"البيض", price:"", pack:30, used:2, unit:"حبة"}
+];
+const root = document.getElementById("ingredients");
+const money = n => n.toLocaleString("ar-SA",{minimumFractionDigits:2,maximumFractionDigits:2});
+function makeIngredient(data={name:"",price:"",pack:"",used:"",unit:"غرام"}) {
+  const card=document.createElement("div"); card.className="ingredient";
+  card.innerHTML=`
+    <div class="ingredient-top">
+      <input aria-label="اسم المكون" class="name" placeholder="اسم المكون (مثال: فانيلا)" value="${String(data.name).replaceAll('"','&quot;')}">
+      <button class="danger remove" type="button">حذف</button>
+    </div>
+    <div class="fields">
+      <div><label>سعر العبوة (ريال)</label><input class="price" type="number" min="0" step="any" placeholder="مثال: 7" value="${data.price}"></div>
+      <div><label>وزن/كمية العبوة</label><input class="pack" type="number" min="0" step="any" placeholder="مثال: 1000" value="${data.pack}"></div>
+      <div><label>الكمية المستخدمة</label><input class="used" type="number" min="0" step="any" placeholder="مثال: 150" value="${data.used}"></div>
+    </div>
+    <div class="costline"><span class="unit-label">الوحدة: ${data.unit||"غرام"}</span><span>تكلفة المستخدم: <b class="cost">—</b></span></div>`;
+  card.querySelector(".remove").addEventListener("click",()=>{card.remove(); calculate();});
+  card.querySelectorAll("input").forEach(el=>el.addEventListener("input",calculate));
+  root.appendChild(card);
+}
+function calculate() {
+  let total=0, complete=0, lines=[];
+  root.querySelectorAll(".ingredient").forEach(card=>{
+    const name=card.querySelector(".name").value.trim()||"مكون بدون اسم";
+    const price=Number(card.querySelector(".price").value);
+    const pack=Number(card.querySelector(".pack").value);
+    const used=Number(card.querySelector(".used").value);
+    const valid=card.querySelector(".price").value!=="" && card.querySelector(".pack").value!=="" && card.querySelector(".used").value!=="" && price>=0 && pack>0 && used>=0;
+    const cost=valid ? price*used/pack : null;
+    card.querySelector(".cost").textContent=cost===null?"أدخل البيانات":money(cost)+" ر.س";
+    if(valid){total+=cost;complete++;lines.push({name,cost});}
+  });
+  document.getElementById("total").textContent=money(total)+" ر.س";
+  const yieldCount=Number(document.getElementById("yield").value);
+  document.getElementById("perItem").textContent=yieldCount>0?money(total/yieldCount)+" ر.س":"—";
+  document.getElementById("complete").textContent=complete;
+  const breakdown=document.getElementById("breakdown");
+  breakdown.innerHTML=lines.length ? "<h3>تفصيل التكلفة</h3>"+lines.map(x=>`<div class="costline"><span>${x.name.replaceAll("<","&lt;").replaceAll(">","&gt;")}</span><strong>${money(x.cost)} ر.س</strong></div>`).join("") : '<p class="empty">أدخل بيانات مكون واحد على الأقل لعرض التفصيل.</p>';
+}
+function reset() { root.innerHTML=""; defaults.forEach(makeIngredient); document.getElementById("yield").value=18; document.getElementById("recipeName").value="كوكيز"; calculate(); }
+document.getElementById("add").addEventListener("click",()=>{makeIngredient();calculate();});
+document.getElementById("reset").addEventListener("click",reset);
+document.getElementById("yield").addEventListener("input",calculate);
+reset();
+</script>
+</body>
+</html>
