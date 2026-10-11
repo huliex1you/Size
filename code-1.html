@@ -1,91 +1,230 @@
->فهد القحطاني <small>عميل جديد</small></div>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>دوَن 📝</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Cairo',sans-serif; -webkit-tap-highlight-color:transparent; }
+
+:root {
+  --dark:#1A1A2E;
+  --card:#252542;
+  --gold:#F5B942;
+  --green:#4CC9A6;
+  --text:#EDEDF5;
+  --muted:#9a9ab5;
+}
+
+body { background:var(--dark); color:var(--text); min-height:100vh; }
+
+/* Header */
+header { padding:20px 5%; display:flex; justify-content:space-between; align-items:center; background:var(--card); position:sticky; top:0; z-index:10; box-shadow:0 3px 15px rgba(0,0,0,.3); }
+.logo { font-size:1.6rem; font-weight:900; }
+.logo span { color:var(--gold); }
+#count { font-size:.85rem; color:var(--muted); }
+
+/* Search */
+.search-bar { padding:15px 5%; }
+.search-bar input {
+  width:100%; padding:13px 18px; border-radius:14px; border:none;
+  background:var(--card); color:var(--text); font-family:'Cairo'; font-size:1rem; outline:none;
+}
+.search-bar input:focus { box-shadow:0 0 0 2px var(--gold); }
+
+/* Notes grid */
+.notes { padding:10px 5% 110px; display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:14px; }
+.note {
+  background:var(--card); border-radius:16px; padding:16px; cursor:pointer;
+  transition:.25s; position:relative; border-right:4px solid var(--gold);
+  animation:pop .3s ease;
+}
+@keyframes pop { from{opacity:0;transform:scale(.9)} to{opacity:1;transform:scale(1)} }
+.note:active { transform:scale(.96); }
+.note h3 { font-size:1.05rem; margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.note p { font-size:.85rem; color:var(--muted); line-height:1.6; max-height:70px; overflow:hidden; }
+.note .date { font-size:.7rem; color:#6b6b8a; margin-top:10px; }
+.note .del {
+  position:absolute; top:10px; left:10px; width:28px; height:28px;
+  border-radius:50%; border:none; background:rgba(255,80,80,.15); color:#ff6b6b;
+  font-size:1rem; cursor:pointer;
+}
+.note .pin { position:absolute; top:12px; right:10px; font-size:.9rem; }
+
+.empty { text-align:center; padding:80px 20px; color:var(--muted); }
+.empty .big { font-size:70px; margin-bottom:15px; }
+
+/* FAB */
+.fab {
+  position:fixed; bottom:25px; left:25px; width:62px; height:62px;
+  border-radius:50%; border:none; background:var(--gold); color:var(--dark);
+  font-size:2rem; font-weight:900; cursor:pointer;
+  box-shadow:0 8px 25px rgba(245,185,66,.4); transition:.25s; z-index:20;
+}
+.fab:active { transform:scale(.9); }
+
+/* Editor sheet */
+.overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:50;
+  display:none; align-items:flex-end; backdrop-filter:blur(3px);
+}
+.overlay.show { display:flex; }
+.sheet {
+  background:var(--card); width:100%; border-radius:25px 25px 0 0;
+  padding:25px; animation:up .3s ease;
+}
+@keyframes up { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.sheet h2 { margin-bottom:18px; font-size:1.3rem; }
+.sheet input, .sheet textarea {
+  width:100%; padding:14px; border-radius:12px; border:1px solid #3d3d5c;
+  background:var(--dark); color:var(--text); font-family:'Cairo'; font-size:1rem;
+  margin-bottom:14px; outline:none; resize:vertical;
+}
+.sheet input:focus, .sheet textarea:focus { border-color:var(--gold); }
+.sheet textarea { min-height:160px; }
+.colors { display:flex; gap:12px; margin-bottom:18px; }
+.color-dot { width:34px; height:34px; border-radius:50%; cursor:pointer; border:3px solid transparent; }
+.color-dot.sel { border-color:#fff; }
+.sheet-btns { display:flex; gap:12px; }
+.sheet-btns button {
+  flex:1; padding:14px; border-radius:12px; border:none;
+  font-family:'Cairo'; font-weight:700; font-size:1rem; cursor:pointer;
+}
+.save { background:var(--green); color:var(--dark); }
+.cancel { background:#3d3d5c; color:var(--text); }
+
+/* Toast */
+.toast {
+  position:fixed; bottom:100px; right:50%; transform:translateX(50%);
+  background:var(--green); color:var(--dark); padding:12px 28px;
+  border-radius:30px; font-weight:700; display:none; z-index:99;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">دوَن <span>📝</span></div>
+    <div id="count">0 تدوينة</div>
+  </div>
+</header>
+
+<div class="search-bar">
+  <input type="text" id="search" placeholder="🔍 ابحث في تدويناتك..." oninput="render()">
+</div>
+
+<div class="notes" id="notesGrid"></div>
+
+<button class="fab" onclick="openEditor()">+</button>
+
+<!-- Editor -->
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <h2 id="sheetTitle">تدوينة جديدة ✍️</h2>
+    <input type="text" id="nTitle" placeholder="العنوان..." maxlength="60">
+    <textarea id="nBody" placeholder="اكتب ما يدور في ذهنك..."></textarea>
+    <div class="colors" id="colors"></div>
+    <div class="sheet-btns">
+      <button class="save" onclick="saveNote()">💾 حفظ</button>
+      <button class="cancel" onclick="closeEditor()">إلغاء</button>
     </div>
   </div>
-</section>
+</div>
 
-<!-- ===== Footer ===== -->
-<footer>
-  <div class="logo" style="font-size:1.8rem">🍪 كوكيز <span style="color:var(--gold)">بيت</span></div>
-  <p style="color:rgba(255,255,255,.6);margin-top:10px">حلاوة تليق بكل لحظة 🍪</p>
-  <div class="socials">
-    <a href="#" title="انستقرام">📸</a>
-    <a href="#" title="تيك توك">🎵</a>
-    <a href="#"اب شات">👻</a>
-    <a href="https://wa.me/9665xxxxxxxx" title="واتساب">💬</a>
-  </div>
-  <prgba(255,255,255,.8)">📱 05xxxxxxxx — الجدة، حي الشاطئ</p>
-  <div class="copyright">© 2025 كوكيز بيت — جميع الحقوق محفوظة</div>
-</footer>
-
-<!-- ===== WhatsApp Float ===== -->
-<a href="https://wa.me/9665xxxxxxxx" class="wa-float">💬</a>
+<div class="toast" id="toast">✅ تم الحفظ</div>
 
 <script>
-const products = [
-  {name:"كوكيز شوكولاتة},
-  {name:"براونيز فودج", price:18},
-  {name:"براونيز فستق", price:22},ريد فيلفيت", price:17},
-  {name:"بوكس مشكل", price:89},
-  {name:"آيس كريم ساندويش", price:20}
-];
+const COLORS = ['#F5B942','#4CC9A6','#F47B7B','#9B7BF5','#6BC1F5'];
+let notes = JSON.parse(localStorage.getItem('dawan') || '[]');
+let editingId = null, selColor = 0;
 
-let selected = 0, qty = 1;
+// بناء دوائر الألوان
+const colorsEl = document.getElementById('colors');
+COLORS.forEach((c,i)=>{
+  const d = document.createElement('div');
+  d.className = 'color-dot' + (i===0?' sel':'');
+  d.style.background = c;
+  d.onclick = ()=>{ selColor=i; document.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('sel')); d.classList.add('sel'); };
+  colorsEl.appendChild(d);
+});
 
-function pick(i, el){
-  selected = i; qty = 1;
-  document.querySelectorAll('.prod-option').forEach(o=>o.classList.remove('selected'));
-  el.classList.add('selected');
-  update();
+function render(){
+  const q = document.getElementById('search').value.trim();
+  const grid = document.getElementById('notesGrid');
+  const list = notes.filter(n =>
+    !q || n.title.includes(q) || n.body.includes(q)
+  ).sort((a,b)=>(b.pinned-a.pinned)||(b.id-a.id));
+
+  document.getElementById('count').textContent = notes.length + ' تدوينة';
+
+  if(!list.length){
+    grid.innerHTML = `<div class="empty"><div class="big">🗒️</div><p>${q?'لا نتائج للبحث':'لا توجد تدوينات بعد<br>اضغط + للبدء!'}</p></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(n => `
+    <div class="note" style="border-right-color:n.color"onclick="openEditor({n.color}" onclick="openEditor(n.color"onclick="openEditor({n.id})">
+      ${n.pinned?'<span class="pin">📌</span>':''}
+      <button class="del" onclick="event.stopPropagation();deleteNote(${n.id✕</button>
+      <h3>${esc(n.title)||'بدون عنوان'}</h3>
+      <p>${esc(n.body)}</p>
+      <div class="date">${n.date}</div>
+    </div>
+  `).join('');
 }
 
-function selectProduct(i){
-  document.getElementById('order').scrollIntoView({behavior:'smooth'});
-  setTimeout(()=>{
-    const('.prod-option');
-    pick(i, opts[i]);
-  }, 600);
+function esc(s){ return s.replace(/</g,'&lt;'); }
+
+function openEditor(id){
+  editingId = id || null;
+  const n = id ? notes.find(x=>x.id===id) : null;
+  document.getElementById('sheetTitle').textContent = n ? 'تعديل التدوينة ✏️' : 'تدوينة جديدة ✍️';
+  document.getElementById('nTitle').value = n ? n.title : '';
+  document.getElementById('nBody').value = n ? n.body : '';
+  selColor = n ? COLORS.indexOf(n.color) : 0;
+  if(selColor<0) selColor=0;
+  document.querySelectorAll('.color-dot').forEach((d,i)=>d.classList.toggle('sel', i===selColor));
+  document.getElementById('overlay').classList.add('show');
 }
 
-function changeQty(d){
-  qty1, Math.min(50, qty + d));
-  document.getElementById('qtyVal').textContent = qty;
-  update();
+function closeEditor(){
+  document.getElementById('overlay').classList.remove('show');
 }
 
-function update(){
-  const t = products[selected].price * qty;
-  document.getElementById('total').textContent = t + ' ر.س';
+function saveNote(){
+  const title = document.getElementById('nTitle').value.trim();
+  const body = document.getElementById('nBody').value.trim();
+  if(!title && !body){ showToast('⚠️ اكتب شيئاً أولاً'); return; }
+
+  if(editingId){
+    const n = notes.find(x=>x.id===editingId);
+    n.title=title; n.body=body; n.color=COLORS[selColor];
+  } else {
+    notes.push({ id:Date.now(), title, body, color:COLORS[selColor], pinned:false,
+      date:new Date().toLocaleDateString('ar-EG',{day:'numeric',month:'long'}) });
+  }
+  localStorage.setItem('dawan', JSON.stringify(notes));
+  closeEditor(); render(); showToast('✅ تم الحفظ');
 }
 
-function submitOrder(e){
-  e.preventDefault();.getElementById('fname').value;
-  const phone = document.getElementById('phone').value;
-  const p = products[selected
-  const total = p.price * qty;
-
-  const msg = `طلب جديد 🍪%0A
-المنتج: ${p.name}%0A
-الكمية: ${qty}%0A
-الإجمالي: ${total} ر.س%0A
-الاسم: ${name}%0A
-الجوال: ${phone}`;
-  // ارسل رسالة واتساب تلقائياً (غيّر الرقم لرقمك)
-  window.open('https://wa.me/9665xxxxxxxx?text=' + encodeURIComponent(decodeURIComponent(msg.replace(/\n/g,''))
-
-  document.getElementById('orderForm').style.display = 'none';
-  const s = document.getElementById('successMsg');
-  s.style.display = 'block';
+function deleteNote(id){
+  if(!confirm('حذف هذه التدوينة؟')) return;
+  notes = notes.filter(n=>n.id!==id);
+  localStorage.setItem('dawan', JSON.stringify(notes));
+  render(); showToast('🗑️ تم الحذف');
 }
 
-// تأثير الظهور عند التمرير
-const obs = new IntersectionObserver(entries=>{
-  entries.forEach(en=>{ if(en.isIntersecting) en.target.classList.add('active'); });
-},{threshold:.15});
-document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+function showToast(t){
+  const el = document.getElementById('toast');
+  el.textContent = t; el.style.display = 'block';
+  setTimeout(()=>el.style.display='none', 1800);
+}
 
-// تحديد أول منتج افتراضياً
-document.querySelector('.prod-option').classList.add('selected');
-update();
+// إغلاق النافذة بالضغط خارجها
+document.getElementById('overlay').onclick = e => { if(e.target.id==='overlay') closeEditor(); };
+
+render();
 </script>
 </body>
 </html>
