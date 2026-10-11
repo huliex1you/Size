@@ -3,81 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💰 فقاعات المصروفات</title>
+<title>مصروفاتي</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, sans-serif; }
-  body {
-    background:#000;
-    min-height:100vh;
-    display:flex; flex-direction:column; align-items:center;
-    padding:30px 15px; color:#fff;
-  }
-  h1 { margin-bottom:5px; font-size:1.6em; }
-  .subtitle { color:#888; margin-bottom:30px; font-size:.95em; }
+  * { margin:0; padding:0; box-sizing:border-box; font-family:Tahoma, sans-serif; }
+  body { background:#000; min-height:100vh; padding:30px 15px; color:#fff; text-align:center; }
+  h1 { margin-bottom:5px; }
+  .subtitle { color:#888; margin-bottom:30px; }
 
-  /* ===== شبكة الفقاعات ===== */
   .bubble-grid {
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));
-    gap:25px; justify-items:center; max-width:900px;
+    display:flex; flex-wrap:wrap; gap:25px;
+    justify-content:center; max-width:950px; margin:0 auto;
   }
   .bubble {
     width:130px; height:130px; border-radius:50%;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     cursor:pointer; gap:6px;
-    box-shadow:0 8px 25px rgba(0,0,0,.5), inset 0 -6px 15px rgba(0,0,0,.2);
-    transition:transform .25s, box-shadow .25s;
-    position:relative; overflow:hidden;
-    animation:pop .5s ease backwards;
+    box-shadow:0 8px 25px rgba(0,0,0,.5);
+    transition:transform .25s;
+    position:relative;
   }
-  .bubble:nth-child(odd) { animation-delay:.05s; }
-  @keyframes pop { from { transform:scale(0); opacity:0; } to { transform:scale(1); opacity:1; } }
-  .bubble:hover { transform:scale(1.12) translateY(-6px); box-shadow:0 15px 40px rgba(255,255,255,.15); }
-  .bubble .icon { font-size:2.4em; filter:drop-shadow(0 3px 5px rgba(0,0,0,.4)); }
-  .bubble .label { font-size:.85em; font-weight:bold; text-align:center; padding:0 8px; text-shadow:0 1px 3px rgba(0,0,0,.5); }
+  .bubble:hover { transform:scale(1.1); }
+  .bubble .icon { font-size:2.4em; }
+  .bubble .label { font-size:.8em; font-weight:bold; padding:0 10px; }
   .bubble .count {
-    position:absolute; top:12px; left:14px;
-    background:rgba(0,0,0,.35); border-radius:50%;
+    position:absolute; top:10px; left:12px;
+    background:rgba(0,0,0,.4); border-radius:50%;
     min-width:26px; height:26px; font-size:.75em;
     display:flex; align-items:center; justify-content:center;
   }
 
-  /* ===== نافذة التفاصيل ===== */
   .overlay {
-    position:fixed; inset:0; background:rgba(0,0,0,.85);
-    display:none; align-items:center; justify-content:center; z-index:100;
-    backdrop-filter:blur(4px);
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,.85); z-index:100;
+    align-items:center; justify-content:center;
   }
   .overlay.active { display:flex; }
   .panel {
-    background:#111; border-radius:25px; padding:30px;
-    width:min(500px, 92vw); max-height:85vh; overflow-y:auto;
-    border:1px solid rgba(255,255,255,.15);
-    animation:slide .35s ease;
+    background:#111; border-radius:20px; padding:25px;
+    width:92%; max-width:480px; max-height:80vh; overflow-y:auto;
+    border:1px solid #333;
   }
-  @keyframes slide { from { transform:translateY(40px); opacity:0; } to { transform:none; opacity:1; } }
-  .panel-head { display:flex; align-items:center; gap:15px; margin-bottom:20px; }
-  .panel-head .p-icon {
-    width:70px; height:70px; border-radius:50%; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center; font-size:2em;
-  }
-  .panel h2 { font-size:1.3em; }
-  .panel .total { color:#4ade80; font-size:.9em; margin-top:4px; }
   .item {
-    display:flex; justify-content:space-between; align-items:center;
-    background:rgba(255,255,255,.06); border-radius:14px;
-    padding:14px 18px; margin-bottom:10px; transition:background .2s;
+    display:flex; justify-content:space-between;
+    background:#222; border-radius:12px;
+    padding:13px 16px; margin-bottom:9px;
   }
-  .item:hover { background:rgba(255,255,255,.12); }
-  .item .name { font-size:.95em; }
-  .item .amount { font-weight:bold; color:#fbbf24; font-size:.9em; }
+  .item .amount { color:#fbbf24; font-weight:bold; }
   .close-btn {
-    width:100%; padding:13px; border:none; border-radius:14px;
-    background:linear-gradient(135deg,#ef4444,#b91c1c); color:#fff;
-    font-size:1em; font-weight:bold; cursor:pointer; margin-top:10px;
+    width:100%; padding:12px; border:none; border-radius:12px;
+    background:#ef4444; color:#fff; font-weight:bold; cursor:pointer; margin-top:8px;
   }
-  ::-webkit-scrollbar { width:6px; }
-  ::-webkit-scrollbar-thumb { background:#444; border-radius:3px; }
 </style>
 </head>
 <body>
@@ -87,61 +62,86 @@
 
 <div class="bubble-grid" id="grid"></div>
 
-<div class="overlay" id="overlay" onclick="if(event.target===this)closePanel()">
+<div class="overlay" id="overlay">
   <div class="panel" id="panel"></div>
 </div>
 
 <script>
-const groups = [
- {icon:"🏠", label:"السكن والمنزلية", color:"linear-gradient(135deg,#3b82f6,#1e3a8a)",
-  items:["إيجار / أقساط عقارية","كهرباء وماء","إنترنت واتصالات منزلية","غاز","صيانة المنزل وإصلاحات","أثاث ومستلزمات منزلية"]},
- {icon:"🚗", label:"السيارة والمواصلات", color:"linear-gradient(135deg,#f97316,#c2410c)",
-  items:["وقود","تأمين السيارة","صيانة وإصلاحات","غسيل وعناية","تزيين وإكسسوارات","مخالفات مرورية","مواقف السيارات","أوبر / كريم"]},
- {icon:"🛒", label:"المقاضي والسوبرماركت", color:"linear-gradient(135deg,#22c55e,#15803d)",
-  items:["مواد غذائية وبقالة","لحوم ودواجن وأسماك","خضار وفواكه","مخبز وحلويات","منظفات وأدوات بلاستيكية","مستلزمات العناية الشخصية"]},
- {icon:"👨‍👩‍👧‍👦", label:"الأسرة والأبناء", color:"linear-gradient(135deg,#ec4899,#9d174d)",
-  items:["رسوم مدرسية","مستلزمات مدرسية وقرطاسية","ملابس وأحذية للأبناء","مصروف جيب","ألعاب وترفيه عائلي","جليسة أطفال / حضانة"]},
- {icon:"🏥", label:"الصحة والعناية", color:"linear-gradient(135deg,#ef4444,#7f1d1d)",
-  items:["أدوية وصيدلية","تأمين طبي","زيارات العيادات","نادي رياضي (جيم)","صالون حلاقة / تجميل","مكملات وفيتامينات","مستحضرات تجميل وعطور"]},
- {icon:"🍔", label:"المطاعم والقهوة", color:"linear-gradient(135deg,#f59e0b,#b45309)",
-  items:["مطاعم ووجبات رئيسية","مقاهي وقهوة مختصة","تطبيقات توصيل طعام","وجبات سريعة","حلويات ومخبوزات"]},
- {icon:"🛍️", label:"التسوق والملابس", color:"linear-gradient(135deg,#a855f7,#6b21a8)",
-  items:["ملابس رجالية","ملابس نسائية","أحذية وحقائب","إكسسوارات ومجوهرات","إلكترونيات وأجهزة ذكية"]},
- {icon:"✈️", label:"السفر والترفيه", color:"linear-gradient(135deg,#06b6d4,#0e7490)",
-  items:["تذاكر طيران","سكن وفنادق","أنشطة سياحية","تأشيرات وتأمين سفر","سينما وفعاليات","اشتراكات رقمية (نتفليكس، شاهد)"]},
- {icon:"💸", label:"الالتزامات والديون", color:"linear-gradient(135deg,#dc2626,#450a0a)",
-  items:["قروض شخصية / تمويل","بطاقات ائتمانية","جمعيات شهرية","سداد ديون شخصية","رسوم حكومية وبنكية"]},
- {icon:"💰", label:"الادخار والاستثمار", color:"linear-gradient(135deg,#16a34a,#14532d)",
-  items:["صندوق الطوارئ","ادخار للسفر أو أهداف","أسهم وصناديق استثمارية","شراء ذهب","ادخار للأبناء / تقاعد"]},
- {icon:"🕌", label:"الصدقات والتبرعات", color:"linear-gradient(135deg,#10b981,#065f46)",
-  items:["زكاة مال","صدقات وتبرعات","كفالة أيتام","هدايا ومناسبات","مساعدة الأهل والأقارب"]},
- {icon:"🎓", label:"التعليم والتطوير", color:"linear-gradient(135deg,#6366f1,#312e81)",
-  items:["دورات تدريبية","كتب ومجلات","اشتراكات منصات تعليمية","استشارات مهنية وشخصية"]},
- {icon:"🐾", label:"الحيوانات الأليفة", color:"linear-gradient(135deg,#d946ef,#701a75)",
-  items:["طعام الحيوانات","عيادة بيطرية وتطعيمات","ألعاب وإكسسوارات","رعاية ونظافة Grooming"]},
+var groups = [
+  {icon:"🏠", label:"السكن والمنزلية", color:"#2563eb",
+   items:["إيجار / أقساط عقارية","كهرباء وماء","إنترنت واتصالات","غاز","صيانة المنزل","أثاث ومستلزمات"]},
+
+  {icon:"🚗", label:"السيارة والمواصلات", color:"#ea580c",
+   items:["وقود","تأمين السيارة","صيانة وإصلاحات","غسيل وعناية","إكسسوارات","مخالفات مرورية","مواقف","أوبر / كريم"]},
+
+  {icon:"🛒", label:"المقاضي", color:"#16a34a",
+   items:["مواد غذائية","لحوم ودواجن وأسماك","خضار وفواكه","مخبز وحلويات","منظفات","عناية شخصية"]},
+
+  {icon:"👨‍👩‍👧‍👦", label:"الأسرة والأبناء", color:"#db2777",
+   items:["رسوم مدرسية","قرطاسية","ملابس الأبناء","مصروف جيب","ترفيه عائلي","حضانة"]},
+
+  {icon:"🏥", label:"الصحة", color:"#dc2626",
+   items:["أدوية","تأمين طبي","عيادات وفحوصات","نادي رياضي","حلاقة / تجميل","فيتامينات","عطور"]},
+
+  {icon:"🍔", label:"المطاعم والقهوة", color:"#d97706",
+   items:["مطاعم","مقاهي","تطبيقات توصيل","وجبات سريعة","حلويات"]},
+
+  {icon:"🛍️", label:"التسوق", color:"#9333ea",
+   items:["ملابس رجالية","ملابس نسائية","أحذية وحقائب","إكسسوارات ومجوهرات","إلكترونيات"]},
+
+  {icon:"✈️", label:"السفر والترفيه", color:"#0891b2",
+   items:["تذاكر طيران","فنادق","أنشطة سياحية","تأشيرات","سينما وفعاليات","اشتراكات رقمية"]},
+
+  {icon:"💸", label:"الديون", color:"#b91c1c",
+   items:["قروض","بطاقات ائتمانية","جمعيات","سداد ديون","رسوم بنكية"]},
+
+  {icon:"💰", label:"الادخار والاستثمار", color:"#15803d",
+   items:["صندوق الطوارئ","ادخار للسفر","أسهم وصناديق","ذهب","ادخار الأبناء / تقاعد"]},
+
+  {icon:"🕌", label:"الصدقات", color:"#059669",
+   items:["زكاة مال","صدقات وتبرعات","كفالة أيتام","هدايا ومناسبات","مساعدة الأهل"]},
+
+  {icon:"🎓", label:"التعليم والتطوير", color:"#4f46e5",
+   items:["دورات تدريبية","كتب ومجلات","منصات تعليمية","استشارات"]},
+
+  {icon:"🐾", label:"الحيوانات الأليفة", color:"#c026d3",
+   items:["طعام الحيوانات","عيادة بيطرية","ألعاب وإكسسوارات","رعاية ونظافة"]}
 ];
 
-const grid = document.getElementById('grid');
-groups.forEach((g,i)=>{
-  const b = document.createElement('div');
-  b.className='bubble'; b.style.background=g.color; b.style.animationDelay=(i*.06)+'s';
-  b.innerHTML = `<span class="icon">g.icon</span><spanclass="label">{g.icon}</span><span class="label">g.icon</span><spanclass="label">{g.label}</span><span class="count">${g.items.length}</span>`;
-  b.onclick = ()=>openPanel(g);
-  grid.appendChild(b);
-});
+var grid = document.getElementById("grid");
 
-function openPanel(g){
-  const p = document.getElementById('panel');
-  p.innerHTML = `
-    <div class="panel-head">
-      <div class="p-icon" style="background:g.color">{g.color}">g.color">{g.icon}</div>
-      <div><h2>g.label</h2><divclass="total">{g.label}</h2><div class="total">g.label</h2><divclass="total">{g.items.length} بند داخل هذه المجموعة</div></div>
-    </div>
-    {g.items.map(it=>`<div class="item"><span class="name">{it}</span><span class="amount">0 ر.س</span></div>`).join('')}
-    <button class="close-btn" onclick="closePanel()">إغلاق ✕</button>`;
-  document.getElementById('overlay').classList.add('active');
+for (var i = 0; i < groups.length; i++) {
+  var g = groups[i];
+  var b = document.createElement("div");
+  b.className = "bubble";
+  b.style.background = g.color;
+  b.innerHTML =
+    '<div class="icon">' + g.icon + '</div>' +
+    '<div class="label">' + g.label + '</div>' +
+    '<div class="count">' + g.items.length + '</div>';
+  b.setAttribute("data-index", i);
+  b.onclick = function() { openPanel(groups[this.getAttribute("data-index")]); };
+  grid.appendChild(b);
 }
-function closePanel(){ document.getElementById('overlay').classList.remove('active'); }
+
+function openPanel(g) {
+  var html = '<h2>' + g.icon + " " + g.label + '</h2><br>';
+  for (var j = 0; j < g.items.length; j++) {
+    html += '<div class="item"><span>' + g.items[j] + '</span><span class="amount">0 ر.س</span></div>';
+  }
+  html += '<button class="close-btn" onclick="closePanel()">إغلاق ✕</button>';
+  document.getElementById("panel").innerHTML = html;
+  document.getElementById("overlay").classList.add("active");
+}
+
+function closePanel() {
+  document.getElementById("overlay").classList.remove("active");
+}
+
+document.getElementById("overlay").onclick = function(e) {
+  if (e.target === this) closePanel();
+};
 </script>
+
 </body>
 </html>
