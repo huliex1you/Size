@@ -3,129 +3,161 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>دوَن 📝</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<title>دوَن 🫧</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;900&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family:'Cairo',sans-serif; -webkit-tap-highlight-color:transparent; }
 
 :root {
-  --dark:#1A1A2E;
-  --card:#252542;
-  --gold:#F5B942;
-  --green:#4CC9A6;
-  --text:#EDEDF5;
-  --muted:#9a9ab5;
+  --bg:#F3F6FF;
+  --card:#FFFFFF;
+  --blue:#3B6CF6;
+  --text:#1E2340;
+  --muted:#8B93B8;
 }
 
-body { background:var(--dark); color:var(--text); min-height:100vh; }
+body { background:linear-gradient(160deg,#EEF3FF 0%,#E4EBFF 50%,#F5EFFF 100%); min-height:100vh; color:var(--text); }
 
-/* Header */
-header { padding:20px 5%; display:flex; justify-content:space-between; align-items:center; background:var(--card); position:sticky; top:0; z-index:10; box-shadow:0 3px 15px rgba(0,0,0,.3); }
-.logo { font-size:1.6rem; font-weight:900; }
-.logo span { color:var(--gold); }
-#count { font-size:.85rem; color:var(--muted); }
-
-/* Search */
-.search-bar { padding:15px 5%; }
-.search-bar input {
-  width:100%; padding:13px 18px; border-radius:14px; border:none;
-  background:var(--card); color:var(--text); font-family:'Cairo'; font-size:1rem; outline:none;
+/* ===== Header ===== */
+header { padding:18px 5%; display:flex; justify-content:space-between; align-items:center; }
+.header-actions { display:flex; gap:12px; align-items:center; }
+.h-btn {
+  width:52px; height:52px; border-radius:18px; border:none; cursor:pointer;
+  background:#fff; box-shadow:0 4px 15px rgba(59,108,246,.12); font-size:1.3rem;
 }
-.search-bar input:focus { box-shadow:0 0 0 2px var(--gold); }
-
-/* Notes grid */
-.notes { padding:10px 5% 110px; display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:14px; }
-.note {
-  background:var(--card); border-radius:16px; padding:16px; cursor:pointer;
-  transition:.25s; position:relative; border-right:4px solid var(--gold);
-  animation:pop .3s ease;
+.add-hdr {
+  width:52px; height:52px; border-radius:18px; border:none; cursor:pointer;
+  background:linear-gradient(135deg,#8B5CF6,#6D28D9); color:#fff; font-size:1.4rem;
+  box-shadow:0 6px 18px rgba(109,40,217,.35);
 }
-@keyframes pop { from{opacity:0;transform:scale(.9)} to{opacity:1;transform:scale(1)} }
-.note:active { transform:scale(.96); }
-.note h3 { font-size:1.05rem; margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.note p { font-size:.85rem; color:var(--muted); line-height:1.6; max-height:70px; overflow:hidden; }
-.note .date { font-size:.7rem; color:#6b6b8a; margin-top:10px; }
-.note .del {
-  position:absolute; top:10px; left:10px; width:28px; height:28px;
-  border-radius:50%; border:none; background:rgba(255,80,80,.15); color:#ff6b6b;
-  font-size:1rem; cursor:pointer;
+.title-box { text-align:right; }
+.title-box h1 { font-size:1.5rem; font-weight:900; }
+.title-box p { font-size:.8rem; color:var(--muted); }
+
+/* ===== Bubble Canvas ===== */
+.stage {
+  margin:15px 4%; background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.8);
+  border-radius:28px; height:calc(100vh - 230px); min-height:480px;
+  position:relative; overflow:hidden; backdrop-filter:blur(10px);
+  box-shadow:inset 0 2px 20px rgba(255,255,255,.6), 0 10px 40px rgba(59,108,246,.08);
 }
-.note .pin { position:absolute; top:12px; right:10px; font-size:.9rem; }
 
-.empty { text-align:center; padding:80px 20px; color:var(--muted); }
-.empty .big { font-size:70px; margin-bottom:15px; }
+/* خطوط متقطعة بين الفقاعات */
+.stage svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.stage line { stroke:#B8C6F0; stroke-width:2; stroke-dasharray:5 6; }
 
-/* FAB */
+/* ===== الفقاعة ===== */
+.bubble {
+  position:absolute; border-radius:50%; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  color:#fff; text-align:center; user-select:none;
+  box-shadow:0 12px 30px rgba(0,0,0,.18), inset -8px -10px 25px rgba(0,0,0,.15), inset 8px 8px 20px rgba(255,255,255,.35);
+  transition:transform .2s; animation:float 4s ease-in-out infinite;
+}
+.bubble:active { transform:scale(.93); }
+@keyframes float { 0%,100%{translate:0 0} 50%{translate:0 -7px} }
+
+.bubble .emoji { font-size:1.6rem; filter:drop-shadow(0 2px 3px rgba(0,0,0,.2)); }
+.bubble .lbl { font-weight:800; font-size:.85rem; text-shadow:0 1px 4px rgba(0,0,0,.25); }
+.bubble .cnt {
+  background:rgba(0,0,0,.25); min-width:26px; padding:1px 8px; border-radius:20px;
+  font-size:.75rem; font-weight:700; margin-top:3px;
+}
+
+/* الفقاعة المركزية */
+.center {
+  width:150px; height:150px; z-index:5;
+  background:radial-gradient(circle at 35% 30%, #7BA2FF, #3B6CF6);
+  animation-delay:.5s;
+}
+.center .plus { font-size:2.6rem; font-weight:300; line-height:1; }
+.center .lbl { font-size:1.05rem; }
+.center .tag {
+  background:#1E2340; color:#fff; font-size:.7rem; padding:2px 12px;
+  border-radius:20px; margin-top:5px;
+}
+
+/* فقاعة "عرض جديد" المتقطعة */
+.ghost {
+  background:transparent !important; border:3px dashed #3B6CF6; color:var(--blue);
+  box-shadow:none !important;
+}
+.ghost .lbl { color:var(--blue); text-shadow:none; }
+.ghost .plus { font-size:2rem; color:var(--blue); }
+
+/* نقطة صغيرة أسفل الفقاعة */
+.bubble::after {
+  content:''; position:absolute; bottom:-7px; left:50%; transform:translateX(-50%);
+  width:13px; height:13px; border-radius:50%; background:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.15);
+}
+
+/* ===== FAB إعدادات ===== */
 .fab {
-  position:fixed; bottom:25px; left:25px; width:62px; height:62px;
-  border-radius:50%; border:none; background:var(--gold); color:var(--dark);
-  font-size:2rem; font-weight:900; cursor:pointer;
-  box-shadow:0 8px 25px rgba(245,185,66,.4); transition:.25s; z-index:20;
+  position:absolute; bottom:20px; left:20px; width:56px; height:56px;
+  border-radius:50%; border:2px solid var(--blue); background:#fff; color:var(--blue);
+  font-size:1.3rem; cursor:pointer; box-shadow:0 5px 15px rgba(59,108,246,.2);
 }
-.fab:active { transform:scale(.9); }
 
-/* Editor sheet */
-.overlay {
-  position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:50;
-  display:none; align-items:flex-end; backdrop-filter:blur(3px);
-}
+/* ===== Sheet التدوينة ===== */
+.overlay { position:fixed; inset:0; background:rgba(20,25,60,.5); z-index:50; display:none; align-items:flex-end; backdrop-filter:blur(3px); }
 .overlay.show { display:flex; }
-.sheet {
-  background:var(--card); width:100%; border-radius:25px 25px 0 0;
-  padding:25px; animation:up .3s ease;
-}
+.sheet { background:#fff; width:100%; border-radius:25px 25px 0 0; padding:25px; animation:up .3s ease; }
 @keyframes up { from{transform:translateY(100%)} to{transform:translateY(0)} }
-.sheet h2 { margin-bottom:18px; font-size:1.3rem; }
+.sheet h2 { margin-bottom:15px; }
 .sheet input, .sheet textarea {
-  width:100%; padding:14px; border-radius:12px; border:1px solid #3d3d5c;
-  background:var(--dark); color:var(--text); font-family:'Cairo'; font-size:1rem;
-  margin-bottom:14px; outline:none; resize:vertical;
+  width:100%; padding:14px; border-radius:12px; border:2px solid #E3E8F8;
+  font-family:'Cairo'; font-size:1rem; margin-bottom:12px; outline:none; resize:vertical; background:var(--bg);
 }
-.sheet input:focus, .sheet textarea:focus { border-color:var(--gold); }
-.sheet textarea { min-height:160px; }
-.colors { display:flex; gap:12px; margin-bottom:18px; }
-.color-dot { width:34px; height:34px; border-radius:50%; cursor:pointer; border:3px solid transparent; }
-.color-dot.sel { border-color:#fff; }
+.sheet input:focus, .sheet textarea:focus { border-color:var(--blue); }
+.sheet textarea { min-height:130px; }
 .sheet-btns { display:flex; gap:12px; }
-.sheet-btns button {
-  flex:1; padding:14px; border-radius:12px; border:none;
-  font-family:'Cairo'; font-weight:700; font-size:1rem; cursor:pointer;
-}
-.save { background:var(--green); color:var(--dark); }
-.cancel { background:#3d3d5c; color:var(--text); }
+.sheet-btns button { flex:1; padding:14px; border-radius:12px; border:none; font-family:'Cairo'; font-weight:800; font-size:1rem; cursor:pointer; }
+.save { background:var(--blue); color:#fff; }
+.cancel { background:#E3E8F8; color:var(--text); }
 
 /* Toast */
 .toast {
-  position:fixed; bottom:100px; right:50%; transform:translateX(50%);
-  background:var(--green); color:var(--dark); padding:12px 28px;
-  border-radius:30px; font-weight:700; display:none; z-index:99;
+  position:fixed; bottom:110px; right:50%; transform:translateX(50%);
+  background:var(--text); color:#fff; padding:12px 28px; border-radius:30px;
+  font-weight:700; display:none; z-index:99;
 }
+
+/* Bottom Nav */
+nav {
+  display:flex; justify-content:space-around; padding:10px 0 22px;
+  background:#fff; border-top:1px solid #EEF1FA; position:sticky; bottom:0;
+}
+.nav-item { text-align:center; font-size:.75rem; color:var(--muted); cursor:pointer; position:relative; }
+.nav-item .ic { font-size:1.35rem; display:block; }
+.nav-item.active { color:var(--blue); font-weight:800; }
+.nav-item.active::after { content:''; position:absolute; bottom:-8px; right:50%; transform:translateX(50%); width:5px; height:5px; border-radius:50%; background:var(--blue); }
 </style>
 </head>
 <body>
 
 <header>
-  <div>
-    <div class="logo">دوَن <span>📝</span></div>
-    <div id="count">0 تدوينة</div>
+  <div class="header-actions">
+    <button class="add-hdr" onclick="openEditor()">🔒</button>
+    <div class="title-box">
+      <h1>دوَن 🫧</h1>
+      <p id="subCount">0 تدوينة</p>
+    </div>
   </div>
+  <button class="h-btn" onclick="alert('🔍 البحث')">🔍</button>
 </header>
 
-<div class="search-bar">
-  <input type="text" id="search" placeholder="🔍 ابحث في تدويناتك..." oninput="render()">
+<div class="stage" id="stage">
+  <svg id="lines"></svg>
+  <button class="fab" onclick="alert('⚙️ الإعدادات')">⚙️</button>
 </div>
 
-<div class="notes" id="notesGrid"></div>
-
-<button class="fab" onclick="openEditor()">+</button>
-
-<!-- Editor -->
+<!-- Sheet -->
 <div class="overlay" id="overlay">
   <div class="sheet">
-    <h2 id="sheetTitle">تدوينة جديدة ✍️</h2>
-    <input type="text" id="nTitle" placeholder="العنوان..." maxlength="60">
-    <textarea id="nBody" placeholder="اكتب ما يدور في ذهنك..."></textarea>
-    <div class="colors" id="colors"></div>
+    <h2 id="sheetTitle">فقاعة جديدة ✨</h2>
+    <input type="text" id="nTitle" placeholder="اسم الفقاعة (مثال: أفكار، مهام...)">
+    <textarea id="nBody" placeholder="اكتب محتوى التدوينة..."></textarea>
     <div class="sheet-btns">
       <button class="save" onclick="saveNote()">💾 حفظ</button>
       <button class="cancel" onclick="closeEditor()">إلغاء</button>
@@ -135,96 +167,59 @@ header { padding:20px 5%; display:flex; justify-content:space-between; align-ite
 
 <div class="toast" id="toast">✅ تم الحفظ</div>
 
-<script>
-const COLORS = ['#F5B942','#4CC9A6','#F47B7B','#9B7BF5','#6BC1F5'];
-let notes = JSON.parse(localStorage.getItem('dawan') || '[]');
-let editingId = null, selColor = 0;
+<nav>
+  <div class="nav-item"><span class="ic">🧭</span>المسار المالي</div>
+  <div class="nav-item"><span class="ic">✨</span>دوْن</div>
+  <div class="nav-item active"><span class="ic">🔒</span>بياناتي</div>
+  <div class="nav-item"><span class="ic">📊</span>التحليلات</div>
+  <div class="nav-item"><span class="ic">👤</span>الحساب</div>
+</nav>
 
-// بناء دوائر الألوان
-const colorsEl = document.getElementById('colors');
-COLORS.forEach((c,i)=>{
-  const d = document.createElement('div');
-  d.className = 'color-dot' + (i===0?' sel':'');
-  d.style.background = c;
-  d.onclick = ()=>{ selColor=i; document.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('sel')); d.classList.add('sel'); };
-  colorsEl.appendChild(d);
-});
+<script>
+const GRADS = [
+  'radial-gradient(circle at 35% 30%,#FF7BA9,#E0337C)',
+  'radial-gradient(circle at 35% 30%,#9B7BF5,#6D28D9)',
+  'radial-gradient(circle at 35% 30%,#FFB35C,#E07B12)',
+  'radial-gradient(circle at 35% 30%,#5EDBBC,#0E9F7E)',
+  'radial-gradient(circle at 35% 30%,#6BC1F5,#2563EB)',
+  'radial-gradient(circle at 35% 30%,#FF8E7A,#E25543)'
+];
+const EMOJIS = ['📝','💡','🎯','📚','💼','🌟'];
+
+// مواقع محددة مسبقاً حول المركز (نسب %)
+const SLOTS = [
+  {x:22,y:30}, {x:78,y:32}, {x:15,y:62}, {x:85,y:60}, {x:38,y:80}, {x:65,y:82}
+];
+
+let notes = JSON.parse(localStorage.getItem('dawan_bubbles') || '[]');
+let editingId = null;
 
 function render(){
-  const q = document.getElementById('search').value.trim();
-  const grid = document.getElementById('notesGrid');
-  const list = notes.filter(n =>
-    !q || n.title.includes(q) || n.body.includes(q)
-  ).sort((a,b)=>(b.pinned-a.pinned)||(b.id-a.id));
+  const stage = document.getElementById('stage');
+  const svg = document.getElementById('lines');
+  // نظّف الفقاعات القديمة (مع بقاء svg و fab)
+  stage.querySelectorAll('.bubble').forEach(b=>b.remove());
+  svg.innerHTML = '';
 
-  document.getElementById('count').textContent = notes.length + ' تدوينة';
+  const W = stage.clientWidth, H = stage.clientHeight;
+  const cx = W/2, cy = H/2;
 
-  if(!list.length){
-    grid.innerHTML = `<div class="empty"><div class="big">🗒️</div><p>${q?'لا نتائج للبحث':'لا توجد تدوينات بعد<br>اضغط + للبدء!'}</p></div>`;
-    return;
+  // الفقاعة المركزية
+  addBubble(cx, cy, 75, 'center', '', 'إضافة تدوين', notes.length, ()=>openEditor());
+
+  // فقاعة "عرض جديد" الشبح إذا < 3 فقاعات
+  let items = notes.slice(0, 6);
+  if(items.length < 3){
+    const s = SLOTS[items.length];
+    addBubble(s.x/100*W, s.y/100*H, 52, 'ghost', '＋', 'عرض جديد', null, ()=>openEditor());
   }
-  grid.innerHTML = list.map(n => `
-    <div class="note" style="border-right-color:n.color"onclick="openEditor({n.color}" onclick="openEditor(n.color"onclick="openEditor({n.id})">
-      ${n.pinned?'<span class="pin">📌</span>':''}
-      <button class="del" onclick="event.stopPropagation();deleteNote(${n.id✕</button>
-      <h3>${esc(n.title)||'بدون عنوان'}</h3>
-      <p>${esc(n.body)}</p>
-      <div class="date">${n.date}</div>
-    </div>
-  `).join('');
-}
 
-function esc(s){ return s.replace(/</g,'&lt;'); }
+  // فقاعات التدوينات
+  items.forEach((n,i)=>{
+    const s = SLOTS[i];
+    const b = addBubble(s.x/100*W, s.y/100*H, 58, '', EMOJIS[i%6], n.title, n.count, ()=>openEditor(n.id));
+    b.style.background = GRADS[i%6];
+    // خط متقطع للمركز
+    const line = document.createElementNS('http://www
 
-function openEditor(id){
-  editingId = id || null;
-  const n = id ? notes.find(x=>x.id===id) : null;
-  document.getElementById('sheetTitle').textContent = n ? 'تعديل التدوينة ✏️' : 'تدوينة جديدة ✍️';
-  document.getElementById('nTitle').value = n ? n.title : '';
-  document.getElementById('nBody').value = n ? n.body : '';
-  selColor = n ? COLORS.indexOf(n.color) : 0;
-  if(selColor<0) selColor=0;
-  document.querySelectorAll('.color-dot').forEach((d,i)=>d.classList.toggle('sel', i===selColor));
-  document.getElementById('overlay').classList.add('show');
-}
-
-function closeEditor(){
-  document.getElementById('overlay').classList.remove('show');
-}
-
-function saveNote(){
-  const title = document.getElementById('nTitle').value.trim();
-  const body = document.getElementById('nBody').value.trim();
-  if(!title && !body){ showToast('⚠️ اكتب شيئاً أولاً'); return; }
-
-  if(editingId){
-    const n = notes.find(x=>x.id===editingId);
-    n.title=title; n.body=body; n.color=COLORS[selColor];
-  } else {
-    notes.push({ id:Date.now(), title, body, color:COLORS[selColor], pinned:false,
-      date:new Date().toLocaleDateString('ar-EG',{day:'numeric',month:'long'}) });
-  }
-  localStorage.setItem('dawan', JSON.stringify(notes));
-  closeEditor(); render(); showToast('✅ تم الحفظ');
-}
-
-function deleteNote(id){
-  if(!confirm('حذف هذه التدوينة؟')) return;
-  notes = notes.filter(n=>n.id!==id);
-  localStorage.setItem('dawan', JSON.stringify(notes));
-  render(); showToast('🗑️ تم الحذف');
-}
-
-function showToast(t){
-  const el = document.getElementById('toast');
-  el.textContent = t; el.style.display = 'block';
-  setTimeout(()=>el.style.display='none', 1800);
-}
-
-// إغلاق النافذة بالضغط خارجها
-document.getElementById('overlay').onclick = e => { if(e.target.id==='overlay') closeEditor(); };
-
-render();
-</script>
-</body>
-</html>
+> ⚠️ The response reached the length limit. Reply **continue** to get the rest.
