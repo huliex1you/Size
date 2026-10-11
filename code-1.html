@@ -41,8 +41,6 @@ header { padding:18px 5%; display:flex; justify-content:space-between; align-ite
   position:relative; overflow:hidden; backdrop-filter:blur(10px);
   box-shadow:inset 0 2px 20px rgba(255,255,255,.6), 0 10px 40px rgba(59,108,246,.08);
 }
-
-/* خطوط متقطعة بين الفقاعات */
 .stage svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
 .stage line { stroke:#B8C6F0; stroke-width:2; stroke-dasharray:5 6; }
 
@@ -58,7 +56,7 @@ header { padding:18px 5%; display:flex; justify-content:space-between; align-ite
 @keyframes float { 0%,100%{translate:0 0} 50%{translate:0 -7px} }
 
 .bubble .emoji { font-size:1.6rem; filter:drop-shadow(0 2px 3px rgba(0,0,0,.2)); }
-.bubble .lbl { font-weight:800; font-size:.85rem; text-shadow:0 1px 4px rgba(0,0,0,.25); }
+.bubble .lbl { font-weight:800; font-size:.8rem; text-shadow:0 1px 4px rgba(0,0,0,.25); padding:0 8px; }
 .bubble .cnt {
   background:rgba(0,0,0,.25); min-width:26px; padding:1px 8px; border-radius:20px;
   font-size:.75rem; font-weight:700; margin-top:3px;
@@ -77,13 +75,14 @@ header { padding:18px 5%; display:flex; justify-content:space-between; align-ite
   border-radius:20px; margin-top:5px;
 }
 
-/* فقاعة "عرض جديد" المتقطعة */
+/* فقاعة شبح متقطعة */
 .ghost {
   background:transparent !important; border:3px dashed #3B6CF6; color:var(--blue);
   box-shadow:none !important;
 }
 .ghost .lbl { color:var(--blue); text-shadow:none; }
 .ghost .plus { font-size:2rem; color:var(--blue); }
+.ghost::after { display:none; }
 
 /* نقطة صغيرة أسفل الفقاعة */
 .bubble::after {
@@ -97,24 +96,30 @@ header { padding:18px 5%; display:flex; justify-content:space-between; align-ite
   position:absolute; bottom:20px; left:20px; width:56px; height:56px;
   border-radius:50%; border:2px solid var(--blue); background:#fff; color:var(--blue);
   font-size:1.3rem; cursor:pointer; box-shadow:0 5px 15px rgba(59,108,246,.2);
+  z-index:10;
 }
 
-/* ===== Sheet التدوينة ===== */
+/* ===== Sheet ===== */
 .overlay { position:fixed; inset:0; background:rgba(20,25,60,.5); z-index:50; display:none; align-items:flex-end; backdrop-filter:blur(3px); }
 .overlay.show { display:flex; }
-.sheet { background:#fff; width:100%; border-radius:25px 25px 0 0; padding:25px; animation:up .3s ease; }
+.sheet { background:#fff; width:100%; border-radius:25px 25px 0 0; padding:25px; max-height:85vh; overflow-y:auto; animation:up .3s ease; }
 @keyframes up { from{transform:translateY(100%)} to{transform:translateY(0)} }
 .sheet h2 { margin-bottom:15px; }
-.sheet input, .sheet textarea {
+.sheet input, .sheet textarea, .sheet select {
   width:100%; padding:14px; border-radius:12px; border:2px solid #E3E8F8;
   font-family:'Cairo'; font-size:1rem; margin-bottom:12px; outline:none; resize:vertical; background:var(--bg);
 }
-.sheet input:focus, .sheet textarea:focus { border-color:var(--blue); }
+.sheet input:focus, .sheet textarea:focus, .sheet select:focus { border-color:var(--blue); }
 .sheet textarea { min-height:130px; }
+.sheet select { -webkit-appearance:none; }
 .sheet-btns { display:flex; gap:12px; }
 .sheet-btns button { flex:1; padding:14px; border-radius:12px; border:none; font-family:'Cairo'; font-weight:800; font-size:1rem; cursor:pointer; }
 .save { background:var(--blue); color:#fff; }
 .cancel { background:#E3E8F8; color:var(--text); }
+.row {
+  display:flex; justify-content:space-between; padding:10px 4px;
+  border-bottom:1px solid #EEF1FA; font-size:.95rem;
+}
 
 /* Toast */
 .toast {
@@ -141,31 +146,23 @@ nav {
     <button class="add-hdr" onclick="openEditor()">🔒</button>
     <div class="title-box">
       <h1>دوَن 🫧</h1>
-      <p id="subCount">0 تدوينة</p>
+      <p id="subCount">0 مصروف</p>
     </div>
   </div>
-  <button class="h-btn" onclick="alert('🔍 البحث')">🔍</button>
+  <button class="h-btn" onclick="showToast('🔍 البحث قريباً')">🔍</button>
 </header>
 
 <div class="stage" id="stage">
   <svg id="lines"></svg>
-  <button class="fab" onclick="alert('⚙️ الإعدادات')">⚙️</button>
+  <button class="fab" onclick="showToast('⚙️ الإعدادات قريباً')">⚙️</button>
 </div>
 
 <!-- Sheet -->
 <div class="overlay" id="overlay">
-  <div class="sheet">
-    <h2 id="sheetTitle">فقاعة جديدة ✨</h2>
-    <input type="text" id="nTitle" placeholder="اسم الفقاعة (مثال: أفكار، مهام...)">
-    <textarea id="nBody" placeholder="اكتب محتوى التدوينة..."></textarea>
-    <div class="sheet-btns">
-      <button class="save" onclick="saveNote()">💾 حفظ</button>
-      <button class="cancel" onclick="closeEditor()">إلغاء</button>
-    </div>
-  </div>
+  <div class="sheet" id="sheet"></div>
 </div>
 
-<div class="toast" id="toast">✅ تم الحفظ</div>
+<div class="toast" id="toast">✅ تم</div>
 
 <nav>
   <div class="nav-item"><span class="ic">🧭</span>المسار المالي</div>
@@ -176,119 +173,20 @@ nav {
 </nav>
 
 <script>
-const GRADS = [
-  'radial-gradient(circle at 35% 30%,#FF7BA9,#E0337C)',
-  'radial-gradient(circle at 35% 30%,#9B7BF5,#6D28D9)',
-  'radial-gradient(circle at 35% 30%,#FFB35C,#E07B12)',
-  'radial-gradient(circle at 35% 30%,#5EDBBC,#0E9F7E)',
-  'radial-gradient(circle at 35% 30%,#6BC1F5,#2563EB)',
-  'radial-gradient(circle at 35% 30%,#FF8E7A,#E25543)'
-];
-const EMOJIS = ['📝','💡','🎯','📚','💼','🌟'];
+/* ===== بيانات التصنيفات ===== */
+const CATS = [
+ { id:'home',   icon:'🏠', name:'السكن والمنزل', subs:['إيجار/أقساط','كهرباء وماء','إنترنت واتصالات','غاز','صيانة وإصلاحات','أثاث ومستلزمات'] },
+ { id:'car',    icon:'🚗', name:'السيارة والمواصلات', subs:['وقود','تأمين السيارة','صيانة وإصلاحات','غسيل وعناية','مخالفات مرورية','مواقف','أجرة وتوصيل'] },
+ { id:'food',   icon:'🛒', name:'المقاضي والسوبرماركت', subs:['بقالة','لحوم ودواجن','خضار وفواكه','مخبز وحلويات','منظفات','عناية شخصية'] },
+ { id:'family', icon:'👨‍👩‍👧‍👦', name:'الأسرة والأبناء', subs:['رسوم مدرسية','قرطاسية','ملابس الأبناء','مصروف الجيب','ترفيه عائلي','حضانة'] },
+ { id:'health', icon:'🏥', name:'الصحة والعناية', subs:['أدوية','تأمين طبي','عيادات وفحوصات','جيم','حلاقة/تجميل','فيتامينات','عطور'] },
+ { id:'dine',   icon:'🍔', name:'المطاعم والقهوة', subs:['مطاعم','قهوة مختصة','توصيل طعام','وجبات سريعة','حلويات'] },
+ { id:'shop',   icon:'🛍️', name:'التسوق والملابس', subs:['ملابس رجالية','ملابس نسائية','أحذية وحقائب','إكسسوارات','إلكترونيات'] },
+ { id:'travel', icon:'✈️', name:'السفر والترفيه', subs:['طيران','فنادق','أنشطة سياحية','تأشيرات','سينما وفعاليات','اشتراكات رقمية'] },
+ { id:'debt',   icon:'💸', name:'الالتزامات والديون', subs:['قروض/تمويل','بطاقات ائتمانية','جمعيات','سداد ديون','رسوم حكومية'] },
+ { id:'save',   icon:'💰', name:'الادخار والاستثمار', subs:['صندوق الطوارئ','أهداف قصيرة','أسهم وصناديق','ذهب','أبناء/تقاعد'] },
+ { id:'give',   icon:'🕌', name:'الصدقات والتبرعات', subs:['زكاة','صدقات','كفالة أيتام','هدايا ومناسبات','مساعدة الأهل'] },
+ { id:'edu',    icon:'🎓', name:'التعليم والتطوير', subs:['دورات','كتب','منصات تعليمية','استشارات'] },
+ { id:'pets',   icon:'🐾', name
 
-// مواقع محددة مسبقاً حول المركز (نسب %)
-const SLOTS = [
-  {x:22,y:30}, {x:78,y:32}, {x:15,y:62}, {x:85,y:60}, {x:38,y:80}, {x:65,y:82}
-];
-
-let notes = JSON.parse(localStorage.getItem('dawan_bubbles') || '[]');
-let editingId = null;
-
-function render(){
-  const stage = document.getElementById('stage');
-  const svg = document.getElementById('lines');
-  // نظّف الفقاعات القديمة (مع بقاء svg و fab)
-  stage.querySelectorAll('.bubble').forEach(b=>b.remove());
-  svg.innerHTML = '';
-
-  const W = stage.clientWidth, H = stage.clientHeight;
-  const cx = W/2, cy = H/2;
-
-  // الفقاعة المركزية
-  addBubble(cx, cy, 75, 'center', '', 'إضافة تدوين', notes.length, ()=>openEditor());
-
-  // فقاعة "عرض جديد" الشبح إذا < 3 فقاعات
-  let items = notes.slice(0, 6);
-  if(items.length < 3){
-    const s = SLOTS[items.length];
-    addBubble(s.x/100*W, s.y/100*H, 52, 'ghost', '＋', 'عرض جديد', null, ()=>openEditor());
-  }
-
-  // فقاعات التدوينات
-  items.forEach((n,i)=>{
-    const s = SLOTS[i];
-    const b = addBubble(s.x/100*W, s.y/100*H, 58, '', EMOJIS[i%6], n.title, n.count, ()=>openEditor(n.id));
-    b.style.background = GRADS[i%6];
-    // خط متقطع للمركز
-    const line = document.createElementNS('http://www
-
-addBubble(cx, cy, 75, ...)  // 75 = نصف قطر المركز
-addBubble(..., 58, ...)     // 58 = نصف قطر الفقاعات العادية
-w3.org/2000/svg');
-line.setAttribute('x1',cx); line.setAttribute('y1',cy);
-line.setAttribute('x2',s.x/100W); line.setAttribute('y2',s.y/100H);
-svg.appendChild(line);
-});
-
-document.getElementById('subCount').textContent = notes.length + ' تدوينة';
-}
-
-function addBubble(x, y, r, extraCls, emoji, lbl, cnt, onClick){
-const stage = document.getElementById('stage');
-const b = document.createElement('div');
-b.className = 'bubble ' + extraCls;
-b.style.width = b.style.height = r*2 + 'px';
-b.style.left = (x - r) + 'px';
-b.style.top = (y - r) + 'px';
-b.style.animationDelay = (Math.random()*2) + 's';
-b.innerHTML = {emoji ? `<div class="emoji">{emoji}</div> : (extraCls==='center' ? '
-
-+
-' : '')}
-${lbl}
-
-{cnt !== null ? `<div class="cnt">{cnt}: ''} ;
-b.onclick = onClick;
-stage.appendChild(b);
-return b;
-}
-function openEditor(id){
-editingId = id || null;
-const n = id ? notes.find(x=>x.id===id) : null;
-document.getElementById('sheetTitle').textContent = n ? 'تعديل الفقاعة ✏️' : 'فقاعة جديدة ✨';
-document.getElementById('nTitle').value = n ? n.title : '';
-document.getElementById('nBody').value = n ? n.body : '';
-document.getElementById('overlay').classList.add('show');
-}
-
-function closeEditor(){
-document.getElementById('overlay').classList.remove('show');
-}
-
-function saveNote(){
-const title = document.getElementById('nTitle').value.trim();
-const body = document.getElementById('nBody').value.trim();
-if(!title && !body){ showToast('⚠️ اكتب شيئاً أولاً'); return; }
-
-if(editingId){
-const n = notes.find(x=>x.id===editingId);
-n.title = title || n.title; n.body = body;
-} else {
-notes.push({ id:Date.now(), title, body, count:1 });
-}
-localStorage.setItem('dawan_bubbles', JSON.stringify(notes));
-closeEditor(); render(); showToast('✅ تم الحفظ');
-}
-
-function showToast(t){
-const el = document.getElementById('toast');
-el.textContent = t; el.style.display = 'block';
-setTimeout(()=>el.style.display='none', 1800);
-}
-
-document.getElementById('overlay').onclick = e => { if(e.target.id==='overlay') closeEditor(); };
-window.addEventListener('resize', render);
-
-render();
-
-```
+> ⚠️ The response reached the length limit. Reply **continue** to get the rest.
