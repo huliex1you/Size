@@ -222,4 +222,73 @@ function render(){
     // خط متقطع للمركز
     const line = document.createElementNS('http://www
 
-> ⚠️ The response reached the length limit. Reply **continue** to get the rest.
+addBubble(cx, cy, 75, ...)  // 75 = نصف قطر المركز
+addBubble(..., 58, ...)     // 58 = نصف قطر الفقاعات العادية
+w3.org/2000/svg');
+line.setAttribute('x1',cx); line.setAttribute('y1',cy);
+line.setAttribute('x2',s.x/100W); line.setAttribute('y2',s.y/100H);
+svg.appendChild(line);
+});
+
+document.getElementById('subCount').textContent = notes.length + ' تدوينة';
+}
+
+function addBubble(x, y, r, extraCls, emoji, lbl, cnt, onClick){
+const stage = document.getElementById('stage');
+const b = document.createElement('div');
+b.className = 'bubble ' + extraCls;
+b.style.width = b.style.height = r*2 + 'px';
+b.style.left = (x - r) + 'px';
+b.style.top = (y - r) + 'px';
+b.style.animationDelay = (Math.random()*2) + 's';
+b.innerHTML = {emoji ? `<div class="emoji">{emoji}</div> : (extraCls==='center' ? '
+
++
+' : '')}
+${lbl}
+
+{cnt !== null ? `<div class="cnt">{cnt}: ''} ;
+b.onclick = onClick;
+stage.appendChild(b);
+return b;
+}
+function openEditor(id){
+editingId = id || null;
+const n = id ? notes.find(x=>x.id===id) : null;
+document.getElementById('sheetTitle').textContent = n ? 'تعديل الفقاعة ✏️' : 'فقاعة جديدة ✨';
+document.getElementById('nTitle').value = n ? n.title : '';
+document.getElementById('nBody').value = n ? n.body : '';
+document.getElementById('overlay').classList.add('show');
+}
+
+function closeEditor(){
+document.getElementById('overlay').classList.remove('show');
+}
+
+function saveNote(){
+const title = document.getElementById('nTitle').value.trim();
+const body = document.getElementById('nBody').value.trim();
+if(!title && !body){ showToast('⚠️ اكتب شيئاً أولاً'); return; }
+
+if(editingId){
+const n = notes.find(x=>x.id===editingId);
+n.title = title || n.title; n.body = body;
+} else {
+notes.push({ id:Date.now(), title, body, count:1 });
+}
+localStorage.setItem('dawan_bubbles', JSON.stringify(notes));
+closeEditor(); render(); showToast('✅ تم الحفظ');
+}
+
+function showToast(t){
+const el = document.getElementById('toast');
+el.textContent = t; el.style.display = 'block';
+setTimeout(()=>el.style.display='none', 1800);
+}
+
+document.getElementById('overlay').onclick = e => { if(e.target.id==='overlay') closeEditor(); };
+window.addEventListener('resize', render);
+
+render();
+
+```
