@@ -1,201 +1,91 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>كوكيز بيت | Cookies House 🍪</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-<style>
-* { margin:0; padding:0; box-sizing:border-box; font-family:'Cairo',sans-serif; }
+>فهد القحطاني <small>عميل جديد</small></div>
+    </div>
+  </div>
+</section>
 
-:root {
-  --brown:#5D3A1A;
-  --choco:#8B5E3C;
-  --cream:#FFF8F0;
-  --gold:#E8A93D;
-  --dark:#2B1A0E;
+<!-- ===== Footer ===== -->
+<footer>
+  <div class="logo" style="font-size:1.8rem">🍪 كوكيز <span style="color:var(--gold)">بيت</span></div>
+  <p style="color:rgba(255,255,255,.6);margin-top:10px">حلاوة تليق بكل لحظة 🍪</p>
+  <div class="socials">
+    <a href="#" title="انستقرام">📸</a>
+    <a href="#" title="تيك توك">🎵</a>
+    <a href="#"اب شات">👻</a>
+    <a href="https://wa.me/9665xxxxxxxx" title="واتساب">💬</a>
+  </div>
+  <prgba(255,255,255,.8)">📱 05xxxxxxxx — الجدة، حي الشاطئ</p>
+  <div class="copyright">© 2025 كوكيز بيت — جميع الحقوق محفوظة</div>
+</footer>
+
+<!-- ===== WhatsApp Float ===== -->
+<a href="https://wa.me/9665xxxxxxxx" class="wa-float">💬</a>
+
+<script>
+const products = [
+  {name:"كوكيز شوكولاتة},
+  {name:"براونيز فودج", price:18},
+  {name:"براونيز فستق", price:22},ريد فيلفيت", price:17},
+  {name:"بوكس مشكل", price:89},
+  {name:"آيس كريم ساندويش", price:20}
+];
+
+let selected = 0, qty = 1;
+
+function pick(i, el){
+  selected = i; qty = 1;
+  document.querySelectorAll('.prod-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  update();
 }
 
-body { background:var(--cream); color:var(--dark); overflow-x:hidden; }
-
-/* ===== Header ===== */
-nav {
-  position:fixed; top:0; width:100%; z-index:100;
-  background:rgba(43,26,14,.95); backdrop-filter:blur(10px);
-  padding:15px 5%; display:flex; justify-content:space-between; align-items:center;
-}
-nav .logo { color:#fff; font-weight:900; font-size:1.5rem; }
-nav .logo span { color:var(--gold); }
-nav ul { display:flex; gap:25px; list-style:none; }
-nav a { color:#fff; text-decoration:none; font-weight:600; transition:.3s; }
-nav a:hover { color:var(--gold); }
-.order-btn-nav {
-  background:var(--gold); color:var(--dark)!important;
-  padding:8px 22px; border-radius:30px; font-weight:700;
+function selectProduct(i){
+  document.getElementById('order').scrollIntoView({behavior:'smooth'});
+  setTimeout(()=>{
+    const('.prod-option');
+    pick(i, opts[i]);
+  }, 600);
 }
 
-/* ===== Hero ===== */
-.hero {
-  min-height:100vh; display:flex; align-items:center;
-  padding:120px 5% 60px; position:relative;
-  background:linear-gradient(135deg,#FFF8F0 60%,#F5E1C8);
-}
-.hero::after {
-  content:"🍪"; position:absolute; font-size:400px; opacity:.08;
-  left:-50px; bottom:-80px; transform:rotate(-20deg);
-}
-.hero-content { max-width:600px; }
-.hero h1 { font-size:3.2rem; font-weight:900; line-height:1.3; }
-.hero h1 span { color:var(--choco); position:relative; }
-.hero h1 span::after {
-  content:""; position:absolute; bottom:5px; right:0; width:100%;
-  height:12px; background:var(--gold); opacity:.4; z-index:-1; border-radius:5px;
-}
-.hero p { margin:20px 0 30px; font-size:1.2rem; color:#6b5a4a; line-height:1.9; }
-.cta-group { display:flex; gap:15px; flex-wrap:wrap; }
-.btn {
-  padding:15px 40px; border-radius:50px; font-weight:700; font-size:1.05rem;
-  cursor:pointer; border:none; text-decoration:none; display:inline-block; transition:.3s;
-}
-.btn-primary { background:var(--brown); color:#fff; box-shadow:0 10px 25px rgba(93,58,26,.3); }
-.btn-primary:hover { transform:translateY(-3px); background:var(--dark); }
-.btn-outline { background:transparent; border:2px solid var(--brown); color:var(--brown); }
-.btn-outline:hover { background:var(--brown); color:#fff; }
-
-.hero-img {
-  position:absolute; left:8%; top:50%; transform:translateY(-50%);
-  font-size:220px; animation:float 3s ease-in-out infinite;
-}
-@keyframes float { 0%,100%{transform:translateY(-50%)} 50%{transform:translateY(-58%)} }
-
-.badge {
-  display:inline-flex; align-items:center; gap:8px;
-  background:#fff; padding:8px 18px; border-radius:30px;
-  font-weight:600; font-size:.9rem; margin-bottom:20px;
-  box-shadow:0 5px 15px rgba(0,0,0,.08);
+function changeQty(d){
+  qty1, Math.min(50, qty + d));
+  document.getElementById('qtyVal').textContent = qty;
+  update();
 }
 
-/* ===== Stats ===== */
-.stats { display:flex; justify-content:center; gap:60px; padding:50px 5%; background:var(--brown); color:#fff; flex-wrap:wrap; text-align:center; }
-.stat h3 { font-size:2.5rem; color:var(--gold); }
-.stat p { font-weight:600; }
-
-/* ===== Products ===== */
-.section { padding:80px 5%; text-align:center; }
-.section-title { font-size:2.4rem; font-weight-bottom:10px; }
-.section-title::after { content:""; display:block; width:80px; height:4px; background:var(--gold); margin:12px auto 0; border-radius:5px; }
-.section-sub { color:#8a7765; margin-bottom:50px; font-size:1.1rem; }
-
-.products { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:30px; max-width:1200px; margin:auto; }
-.card {
-  background:#fff; border-radius:20px; overflow:hidden;
-  box-shadow:0 8px 30px rgba(0,0,0,.08); transition:.35s; cursor:pointer;
+function update(){
+  const t = products[selected].price * qty;
+  document.getElementById('total').textContent = t + ' ر.س';
 }
-.card:hover { transform:translateY(-10px); box-shadow:0 20px 40px rgba(0,0,0,.15); }
-.card .emoji { font-size:90px; padding:35px 0 15px; background:linear-gradient(180deg,#FFF3E4,#fff); }
-.card-body { padding:0 22px 22px; }
-.card h3 { font-size:1.3rem; margin-bottom:6px; }
-.card .desc { color:#8a7765; font-size:.92rem; margin-bottom:15px; line-height:1.7; }
-.price-row { display:flex; justify-content:space-between; align-items:center; }
-.price { font-size:1.4rem; font-weight:900; color:var(--choco); }
-.price small { font-size:.75rem; color:#999; }
-.add-btn {
-  background:var(--brown); color:#fff; border:none; padding:9px 20px;
-  border-radius:30px; cursor:pointer; font-weight:700; font-family:'Cairo'; transition:.3s;
+
+function submitOrder(e){
+  e.preventDefault();.getElementById('fname').value;
+  const phone = document.getElementById('phone').value;
+  const p = products[selected
+  const total = p.price * qty;
+
+  const msg = `طلب جديد 🍪%0A
+المنتج: ${p.name}%0A
+الكمية: ${qty}%0A
+الإجمالي: ${total} ر.س%0A
+الاسم: ${name}%0A
+الجوال: ${phone}`;
+  // ارسل رسالة واتساب تلقائياً (غيّر الرقم لرقمك)
+  window.open('https://wa.me/9665xxxxxxxx?text=' + encodeURIComponent(decodeURIComponent(msg.replace(/\n/g,''))
+
+  document.getElementById('orderForm').style.display = 'none';
+  const s = document.getElementById('successMsg');
+  s.style.display = 'block';
 }
-.add-btn:hover { background:var(--gold); color:var(--dark); }
-.tag { display:inline-block; background:var(--gold); color:var(--dark); font-size:.75rem; font-weight:700; padding:3px 12px; border-radius:20px; margin-bottom:8px; }
 
-/* ===== Features ===== */
-.features { background:#fff; }
-.feature-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:30px; max-width:1100px; margin:auto; }
-.feature { padding:30px; border-radius:18px; background:var(--cream); transition:.3s; }
-.feature:hover { transform:translateY(-5px); }
-.feature .icon { font-size:45px; margin-bottom:15px; }
-.feature h4 { margin-bottom:8px; font-size:1.15rem; }
-.feature p { color:#8a7765; font-size:.92rem; line-height:1.7; }
+// تأثير الظهور عند التمرير
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(en=>{ if(en.isIntersecting) en.target.classList.add('active'); });
+},{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
-/* ===== Order Form ===== */
-.order-section { background:linear-gradient(135deg,var(--dark),var(--brown)); color:#fff; }
-.order-section .section-title { color:#fff; }
-.order-box {
-  max-width:650px; margin:auto; background:rgba(255,255,255,.07);
-  border:1px solid rgba(255,255,255,.15); border-radius:24px; padding:45px;
-  backdrop-filter:blur(10px);
-}
-.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-.form-grid .full { grid-column:1/-1; }
-label { display:block; font-weight:600; margin-bottom:7px; font-size:.95rem; }
-input, select, textarea {
-  width:100%; padding:13px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.2);
-  background:rgba(255,255,255,.1); color:#fff; font-family:'Cairo'; font-size:1rem;
-  transition:.3s; outline:none;
-}
-input::placeholder, textarea::placeholder { color:rgba(255,255,255,.5); }
-input:focus, select:focus, textarea:focus { border-color:var(--gold); background:rgba(255,255,255,.15); }
-select option { color:#333; }
-
-.product-select { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; }
-.prod-option {
-  background:rgba(255,255,255,.08); border:2px solid transparent;
-  padding:14px; border-radius:14px; cursor:pointer; text-align:center; transition:.3s;
-}
-.prod-option:hover { border-color:rgba(232,169,61,.5); }
-.prod-option.selected { border-color:var(--gold); background:rgba(232,169,61,.15); }
-.prod-option .p-emoji { font-size:35px; }
-.prod-option .p-name { font-weight:700; margin-top:5px; }
-.prod-option .p-price { color:var(--gold); font-weight:700; font-size:.9rem; }
-
-.qty-row { display:flex; align-items:center; gap:15px; justify-content:center; margin:18px 0; }
-.qty-btn { width:42px; height:42px; border-radius:12px; border:none; background:var(--gold); color:var(--dark); font-size:1.4rem; font-weight:900; cursor:pointer; }
-#qtyVal { font-size:1.5rem; font-weight:900; min-width:40px; }
-
-.total-bar {
-  display:flex; justify-content:space-between; align-items:center;
-  background:rgba(232,169,61,.15); border:1px dashed var(--gold);
-  padding:15px 20px; border-radius:14px; margin:20px 0; font-size:1.15rem; font-weight:800;
-}
-.submit-btn {
-  width:100%; padding:17px; background:var(--gold); color:var(--dark);
-  border:none; border-radius:14px; font-size:1.2rem; font-weight:900;
-  cursor:pointer; font-family:'Cairo'; transition:.3s;
-}
-.submit-btn:hover { transform:translateY(-2px); box-shadow:0 10px 25px rgba(232,169,61,.4); }
-.success-msg {
-  display:none; text-align:center; padding:30px;
-}
-.success-msg .check { font-size:70px; }
-
-/* ===== Testimonials ===== */
-.testi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:25px; max-width:1100px; margin:auto; }
-.testi { background:#fff; padding:30px; border-radius:18px; box-shadow:0 8px 25px rgba(0,0,0,.07); }
-.testi .stars { color:var(--gold); font-size:1.2rem; margin-bottom:12px; }
-.testi p { color:#5a4a3a; line-height:1.8; margin-bottom:15px; }
-.testi .who { font-weight:700; }
-.testi .who small { display:block; color:#999; font-weight:400; }
-
-/* ===== Footer ===== */
-footer { background:var(--dark); color:#fff; padding:50px 5% 25px; text-align:center; }
-.socials { display:flex; justify-content:center; gap:15px; margin:20px 0; }
-.socials a { width:45px; height:45px; background:rgba(255,255,255,.1); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.3rem; text-decoration:none; transition:.3s; }
-.socials a:hover { background:var(--gold); }
-.copyright { margin-top:25px; padding-top:20px; border-top:1px solid rgba(255,255,255,.1); font-size:.85rem; color:rgba(255,255,255,.6); }
-
-/* ===== WhatsApp Float ===== */
-.wa-float {
-  position:fixed; bottom:25px; left:25px; width:60px; height:60px;
-  background:#25D366; border-radius:50%; display:flex; align-items:center; justify-content:center;
-  font-size:30px; text-decoration:none; box-shadow:0 8px 20px rgba(37,211,102,.4); z-index:99;
-  animation:pulse 2s infinite;
-}
-@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(37,211,102,.5)} 50%{box-shadow:0 0 0 15px rgba(37,211,102,0)} }
-
-@media(max-width:900px){
-  .hero-img { display:none; }
-  .hero h1 { font-size:2.2rem; }
-  nav ul { display:none; }
-  .form-grid { grid-template-columns:1fr; }
-  .product-select { grid-template-columns:1fr 1fr; }
-  .order
-
-> ⚠️ The response reached the length limit. Reply **continue** to get the rest.
+// تحديد أول منتج افتراضياً
+document.querySelector('.prod-option').classList.add('selected');
+update();
+</script>
+</body>
+</html>
